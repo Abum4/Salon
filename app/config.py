@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from sqlalchemy.engine.url import make_url
 import os
 
 
@@ -33,6 +34,16 @@ class Settings(BaseSettings):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
         
         return url
+
+    def database_async_connect_args(self) -> tuple[str, dict]:
+        """Return async DB URL and connect args (handles Railway sslmode)."""
+        url = make_url(self.database_url_async)
+        connect_args: dict = {}
+        sslmode = url.query.get("sslmode")
+        if sslmode in {"require", "verify-ca", "verify-full"}:
+            connect_args["ssl"] = True
+            url = url.set(query={k: v for k, v in url.query.items() if k != "sslmode"})
+        return str(url), connect_args
     
     @property
     def database_url_sync(self) -> str:
