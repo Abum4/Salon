@@ -2,13 +2,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
 
-# Используем property для правильного URL
+# Используем property для правильного async URL
 engine = create_async_engine(
     settings.database_url_async,
     echo=settings.DEBUG,
     future=True,
-    pool_pre_ping=True,  # Проверка соединения
-    pool_recycle=300,    # Переподключение каждые 5 минут
+    pool_pre_ping=True,
+    pool_recycle=300,
 )
 
 async_session_maker = async_sessionmaker(

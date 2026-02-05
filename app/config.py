@@ -4,8 +4,8 @@ import os
 
 
 class Settings(BaseSettings):
-    # Database - Railway автоматически предоставляет DATABASE_URL
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/autocrm"
+    # Database - Railway предоставляет DATABASE_URL
+    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/autocrm"
     
     # JWT
     SECRET_KEY: str = "change-me-in-production"
@@ -18,21 +18,20 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
     
-    # CORS - добавить домены фронтенда
-    CORS_ORIGINS: list[str] = ["*"]
-    
     class Config:
         env_file = ".env"
     
     @property
     def database_url_async(self) -> str:
-        """Convert DATABASE_URL to async format for SQLAlchemy"""
+        """Convert DATABASE_URL to async format"""
         url = self.DATABASE_URL
-        # Railway даёт postgres://, нужно postgresql+asyncpg://
+        
+        # Railway дает postgres://, нужно postgresql+asyncpg://
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql+asyncpg://", 1)
-        elif url.startswith("postgresql://"):
+        elif url.startswith("postgresql://") and "+asyncpg" not in url:
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        
         return url
     
     @property
@@ -41,7 +40,6 @@ class Settings(BaseSettings):
         url = self.DATABASE_URL
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
-        # Remove asyncpg if present
         url = url.replace("+asyncpg", "")
         return url
 
