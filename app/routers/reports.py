@@ -33,7 +33,7 @@ async def get_dashboard(
     today_result = await db.execute(today_query)
     today_stats = today_result.one()
     
-    # Sales this month
+    # Sales month
     month_query = select(
         func.count(Sale.id),
         func.coalesce(func.sum(Sale.sale_price), 0)
@@ -46,7 +46,7 @@ async def get_dashboard(
     available_result = await db.execute(available_query)
     cars_available = available_result.scalar()
     
-    # Top sellers (this month)
+    # Top sellers
     top_sellers_query = select(
         Seller.id,
         Seller.full_name,
@@ -67,7 +67,7 @@ async def get_dashboard(
         ) for row in top_result.all()
     ]
     
-    # Sales chart (last 30 days)
+    # Chart data (30 days)
     chart_data = []
     for i in range(29, -1, -1):
         chart_date = today - timedelta(days=i)

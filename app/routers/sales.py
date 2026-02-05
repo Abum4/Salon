@@ -66,20 +66,20 @@ async def create_sale(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Validate car exists and is available
+    # Validate car
     car_result = await db.execute(select(Car).where(Car.id == sale_data.car_id))
     car = car_result.scalar_one_or_none()
     if not car:
         raise HTTPException(status_code=404, detail="Car not found")
     if car.status != CarStatus.AVAILABLE:
-        raise HTTPException(status_code=400, detail="Car is not available for sale")
+        raise HTTPException(status_code=400, detail="Car is not available")
     
-    # Validate client exists
+    # Validate client
     client_result = await db.execute(select(Client).where(Client.id == sale_data.client_id))
     if not client_result.scalar_one_or_none():
         raise HTTPException(status_code=404, detail="Client not found")
     
-    # Validate seller exists and is active
+    # Validate seller
     seller_result = await db.execute(select(Seller).where(Seller.id == sale_data.seller_id))
     seller = seller_result.scalar_one_or_none()
     if not seller:
@@ -96,7 +96,7 @@ async def create_sale(
     
     await db.commit()
     
-    # Refresh with relationships
+    # Reload with relationships
     result = await db.execute(
         select(Sale)
         .options(selectinload(Sale.car), selectinload(Sale.client), selectinload(Sale.seller))
