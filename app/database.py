@@ -3,12 +3,14 @@ from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
 
 # Используем property для правильного async URL
+database_url_async, connect_args = settings.database_async_connect_args()
 engine = create_async_engine(
-    settings.database_url_async,
+    database_url_async,
     echo=settings.DEBUG,
     future=True,
     pool_pre_ping=True,
     pool_recycle=300,
+    connect_args=connect_args,
 )
 
 async_session_maker = async_sessionmaker(
